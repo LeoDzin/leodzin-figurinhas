@@ -482,25 +482,30 @@ function stripCodeRanges(text) {
 function parsePrefixedNumberLists(text) {
   const codes = [];
   const lines = String(text).split(/\r?\n/);
+  const prefixPattern = /\b([A-Za-z]{2,4})(?::|\s+)(?=\s*\d)/g;
 
   lines.forEach((line) => {
-    const match = line.match(/^\s*([A-Za-z]{2,4})(?::|\s+)(.+)$/);
-    if (!match) {
+    const matches = Array.from(line.matchAll(prefixPattern));
+    if (!matches.length) {
       return;
     }
 
-    const prefix = PREFIX_ALIASES[match[1].toUpperCase()] || match[1].toUpperCase();
-    const numberList = match[2].trim();
-    if (!VALID_PREFIXES.has(prefix) || !/^\d/.test(numberList)) {
-      return;
-    }
-
-    const numbers = numberList.match(/\d{1,3}/g) || [];
-    numbers.forEach((number) => {
-      const normalized = normalizeCode(`${prefix}${number}`);
-      if (normalized) {
-        codes.push(normalized);
+    matches.forEach((match, index) => {
+      const prefix =
+        PREFIX_ALIASES[match[1].toUpperCase()] || match[1].toUpperCase();
+      if (!VALID_PREFIXES.has(prefix)) {
+        return;
       }
+
+      const nextMatch = matches[index + 1];
+      const numberList = line.slice(match.index + match[0].length, nextMatch?.index);
+      const numbers = numberList.match(/\d{1,3}/g) || [];
+      numbers.forEach((number) => {
+        const normalized = normalizeCode(`${prefix}${number}`);
+        if (normalized) {
+          codes.push(normalized);
+        }
+      });
     });
   });
 
