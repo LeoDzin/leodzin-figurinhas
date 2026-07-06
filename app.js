@@ -289,7 +289,9 @@ function getMineData() {
   const reserved = toCountMap(state.collection.reserved);
   const acquired = toCountMap(state.collection.acquired);
 
-  const missing = Object.keys(missingRaw).filter((code) => !acquired[code]);
+  const missing = Object.keys(missingRaw).filter(
+    (code) => !acquired[code] && !ownedRaw[code],
+  );
   const available = { ...duplicates };
   const duplicateTotal = mergeCounts(duplicates, reserved);
 
