@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Troca de Figurinhas - Copa 2026</title>
+    <meta
+      name="description"
+      content="Compare listas de figurinhas da Copa 2026 Panini e encontre trocas possiveis."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-grid">
+        <div>
+          <p class="eyebrow">Panini Brasil - Copa 2026</p>
+          <h1>Troca de figurinhas</h1>
+          <p class="header-copy">
+            Cole suas listas do Sticker Album, clique em Comparar e veja o
+            resultado pronto em texto.
+          </p>
+        </div>
+        <dl class="stats-strip" aria-label="Resumo da minha colecao">
+          <div>
+            <dt>Tenho</dt>
+            <dd id="statOwned">0</dd>
+          </div>
+          <div>
+            <dt>Faltam</dt>
+            <dd id="statMissing">0</dd>
+          </div>
+          <div>
+            <dt>Repetidas</dt>
+            <dd id="statDuplicates">0</dd>
+          </div>
+          <div>
+            <dt>Disponiveis</dt>
+            <dd id="statAvailable">0</dd>
+          </div>
+        </dl>
+      </div>
+    </header>
+
+    <main class="wrap main-layout">
+      <section class="panel compare-panel" aria-labelledby="compareTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Comparar</p>
+            <h2 id="compareTitle">Encontre uma troca</h2>
+          </div>
+          <button class="ghost-button" type="button" id="clearVisitor">
+            Limpar
+          </button>
+        </div>
+
+        <div class="input-grid">
+          <label class="field">
+            <span>Suas repetidas</span>
+            <textarea
+              id="visitorHas"
+              rows="8"
+              spellcheck="false"
+              placeholder="Ex.: BRA1, BRA15, FWC1, MAR3..."
+            ></textarea>
+          </label>
+          <label class="field">
+            <span>Figurinhas que voce precisa</span>
+            <textarea
+              id="visitorNeeds"
+              rows="8"
+              spellcheck="false"
+              placeholder="Ex.: RSA13 SUI6 COD7..."
+            ></textarea>
+          </label>
+        </div>
+
+        <div class="compare-actions">
+          <button class="primary-button" type="button" id="compareButton">
+            Comparar
+          </button>
+          <button class="ghost-button" type="button" id="copyAllResults">
+            Copiar resultado
+          </button>
+        </div>
+
+        <div class="result-text-panel" aria-live="polite">
+          <p id="resultSummary">Cole uma lista para comparar.</p>
+          <textarea
+            id="resultText"
+            rows="8"
+            readonly
+            spellcheck="false"
+          >Resultado da comparacao aparecera aqui.</textarea>
+        </div>
+      </section>
+
+      <section class="panel mine-panel" aria-labelledby="mineTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Minhas listas</p>
+            <h2 id="mineTitle">Faltantes e repetidas</h2>
+          </div>
+          <p class="updated" id="updatedAt">Atualizando...</p>
+        </div>
+
+        <label class="search-field">
+          <span>Filtrar codigo</span>
+          <input id="mineFilter" type="search" placeholder="BRA, FWC, 15..." />
+        </label>
+
+        <div class="mine-tabs" role="tablist" aria-label="Minhas listas">
+          <button class="mine-tab" type="button" data-list="owned">
+            Ja tenho
+          </button>
+          <button class="mine-tab is-active" type="button" data-list="missing">
+            Preciso dessas
+          </button>
+          <button class="mine-tab" type="button" data-list="duplicates">
+            Minhas repetidas
+          </button>
+          <button class="mine-tab" type="button" data-list="reserved">
+            Reservadas
+          </button>
+        </div>
+
+        <div class="mine-toolbar">
+          <p id="mineListSummary">0 codigos</p>
+          <button class="mini-button" type="button" id="copyMineList">
+            Copiar lista
+          </button>
+        </div>
+
+        <div class="code-list large" id="mineList"></div>
+      </section>
+
+      <section class="panel editor-panel" aria-labelledby="editorTitle">
+        <details>
+          <summary>
+            <span>
+              <strong id="editorTitle">Editar meu JSON</strong>
+              <small>Importar, testar e exportar listas</small>
+            </span>
+          </summary>
+
+          <div class="editor-grid">
+            <label class="field">
+              <span>Tenho no album</span>
+              <textarea
+                id="ownerOwned"
+                rows="6"
+                spellcheck="false"
+                placeholder="Cole aqui o texto STICKERS I HAVE exportado pelo app"
+              ></textarea>
+            </label>
+            <label class="field">
+              <span>Minhas faltantes</span>
+              <textarea
+                id="ownerMissing"
+                rows="6"
+                spellcheck="false"
+                placeholder="Cole aqui o texto exportado pelo app"
+              ></textarea>
+            </label>
+            <label class="field">
+              <span>Minhas repetidas</span>
+              <textarea
+                id="ownerDuplicates"
+                rows="6"
+                spellcheck="false"
+                placeholder="Repita o codigo para contar quantidade, ou use JSON"
+              ></textarea>
+            </label>
+            <label class="field">
+              <span>Reservadas / em negociacao</span>
+              <textarea
+                id="ownerReserved"
+                rows="4"
+                spellcheck="false"
+                placeholder="Opcional"
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="editor-actions">
+            <button class="primary-button" type="button" id="previewOwnerData">
+              Usar no navegador
+            </button>
+            <button class="ghost-button" type="button" id="buildJson">
+              Gerar JSON
+            </button>
+            <button class="ghost-button" type="button" id="downloadJson">
+              Baixar collection.json
+            </button>
+          </div>
+
+          <label class="field">
+            <span>JSON gerado</span>
+            <textarea id="jsonOutput" rows="10" spellcheck="false"></textarea>
+          </label>
+        </details>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js?v=20260706-shorthand"></script>
+  </body>
+</html>
