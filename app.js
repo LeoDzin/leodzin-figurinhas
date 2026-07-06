@@ -544,15 +544,22 @@ function toCountMap(input) {
   }
 
   const counted = parseCountedCodes(input);
-  if (Object.keys(counted).length > 0) {
-    return counted;
-  }
+  Object.entries(counted).forEach(([code, count]) => {
+    counts[code] = (counts[code] || 0) + count;
+  });
 
-  parseCodes(input).forEach((code) => {
+  parseCodes(stripCountedCodes(input)).forEach((code) => {
     counts[code] = (counts[code] || 0) + 1;
   });
 
   return counts;
+}
+
+function stripCountedCodes(input) {
+  return String(input).replace(
+    /\b(00|[A-Za-z]{2,4}[-._]?0*\d{1,3})\b\s*\(\s*x\s*\d+\s*\)/gi,
+    " ",
+  );
 }
 
 function uniqueSortedCodes(codes) {
