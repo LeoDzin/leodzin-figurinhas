@@ -199,7 +199,7 @@ function renderStats() {
   const mine = getMineData();
   els.statOwned.textContent = mine.owned.length;
   els.statMissing.textContent = mine.missing.length;
-  els.statDuplicates.textContent = sumCounts(mine.duplicates);
+  els.statDuplicates.textContent = sumCounts(mine.duplicateTotal);
   els.statAvailable.textContent = sumCounts(mine.available);
 
   const updated = state.collection.updatedAt
@@ -227,18 +227,17 @@ function renderMineList() {
   renderCodeList(els.mineList, filtered, {
     counts:
       state.mineList === "duplicates"
-        ? mine.duplicates
+        ? mine.available
         : state.mineList === "reserved"
           ? mine.reserved
           : null,
-    reservedCounts: state.mineList === "duplicates" ? mine.reserved : null,
     emptyText: "Nenhum codigo nesta lista.",
   });
 }
 
 function getMineListCounts(mine, listName) {
   if (listName === "duplicates") {
-    return mine.duplicates;
+    return mine.available;
   }
 
   if (listName === "reserved") {
@@ -291,14 +290,8 @@ function getMineData() {
   const acquired = toCountMap(state.collection.acquired);
 
   const missing = Object.keys(missingRaw).filter((code) => !acquired[code]);
-  const available = {};
-
-  Object.entries(duplicates).forEach(([code, count]) => {
-    const remaining = count - (reserved[code] || 0);
-    if (remaining > 0) {
-      available[code] = remaining;
-    }
-  });
+  const available = { ...duplicates };
+  const duplicateTotal = mergeCounts(duplicates, reserved);
 
   return {
     owned: sortCodes(Object.keys(ownedRaw)),
@@ -306,6 +299,7 @@ function getMineData() {
     duplicates,
     reserved,
     available,
+    duplicateTotal,
   };
 }
 
@@ -322,7 +316,7 @@ function getMineListCodes(mine, listName) {
     return sortCodes(Object.keys(mine.reserved));
   }
 
-  return sortCodes(Object.keys(mine.duplicates));
+  return sortCodes(Object.keys(mine.available));
 }
 
 function buildCollectionFromEditor() {
@@ -335,7 +329,7 @@ function buildCollectionFromEditor() {
     owned,
     missing: toListString(els.ownerMissing.value),
     duplicates: mapToSortedObject(toCountMap(els.ownerDuplicates.value)),
-    reserved: toListString(els.ownerReserved.value),
+    reserved: mapToSortedObject(toCountMap(els.ownerReserved.value)),
     acquired: owned || current.acquired || "",
   };
 }
@@ -344,8 +338,8 @@ function hydrateEditorFromCollection() {
   const mine = getMineData();
   els.ownerOwned.value = state.collection.owned || state.collection.acquired || "";
   els.ownerMissing.value = state.collection.missing || "";
-  els.ownerDuplicates.value = objectToRepeatedText(mine.duplicates);
-  els.ownerReserved.value = state.collection.reserved || "";
+  els.ownerDuplicates.value = formatCountInput(mine.duplicates);
+  els.ownerReserved.value = formatCountInput(mine.reserved);
   els.jsonOutput.value = JSON.stringify(state.collection, null, 2);
 }
 
@@ -644,6 +638,21 @@ function mapToSortedObject(map) {
 
 function sumCounts(map) {
   return Object.values(map).reduce((total, count) => total + count, 0);
+}
+
+function mergeCounts(...maps) {
+  return maps.reduce((merged, map) => {
+    Object.entries(map).forEach(([code, count]) => {
+      merged[code] = (merged[code] || 0) + count;
+    });
+    return merged;
+  }, {});
+}
+
+function formatCountInput(map) {
+  return sortCodes(Object.keys(map))
+    .map((code) => `${code} (x${map[code]})`)
+    .join(" ");
 }
 
 function isSpecialCode(code) {
